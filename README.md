@@ -5,7 +5,7 @@
 # graphannis-malloc_size_of
 
 This is a fork of the `malloc_size_of` crate, which is part of the [Servo codebase](https://github.com/servo/servo/tree/master/components/malloc_size_of) but not published on crates.io yet. 
-The intention of this fork is to make the functionaility of the original crate available to the [graphANNIS](https://github.com/corpus-tools/graphANNIS) corpus search library, which is published on [crates.io](https://crates.io/crates/graphannis).
+The intention of this fork is to make the functionality of the original crate available to the [graphANNIS](https://github.com/corpus-tools/graphANNIS) corpus search library, which is published on [crates.io](https://crates.io/crates/graphannis).
 
 
 The following changes have been made in comparision to the original crate:
