@@ -46,36 +46,32 @@ extern crate app_units;
 extern crate cssparser;
 #[cfg(feature = "euclid")]
 extern crate euclid;
-#[cfg(feature = "servo")]
+#[cfg(feature = "hyper")]
 extern crate hyper;
-#[cfg(feature = "servo")]
+#[cfg(feature = "hyper_serde")]
 extern crate hyper_serde;
-#[cfg(feature = "servo")]
-extern crate mozjs as js;
-#[cfg(feature = "servo")]
+#[cfg(feature = "serde")]
 extern crate serde;
-#[cfg(feature = "servo")]
+#[cfg(feature = "serde_bytes")]
 extern crate serde_bytes;
 #[cfg(feature = "smallbitvec")]
 extern crate smallbitvec;
 #[cfg(feature = "smallvec")]
 extern crate smallvec;
-#[cfg(feature = "servo")]
+#[cfg(feature = "string_cache")]
 extern crate string_cache;
 #[cfg(feature = "thin_slice")]
 extern crate thin_slice;
-#[cfg(feature = "servo")]
+#[cfg(feature = "time")]
 extern crate time;
 #[cfg(feature = "url")]
 extern crate url;
 #[cfg(feature = "void")]
 extern crate void;
-#[cfg(feature = "webrender_api")]
-extern crate webrender_api;
-#[cfg(feature = "servo")]
+#[cfg(feature = "xml5ever")]
 extern crate xml5ever;
 
-#[cfg(feature = "servo")]
+#[cfg(feature = "serde_bytes")]
 use serde_bytes::ByteBuf;
 use std::hash::{BuildHasher, Hash};
 use std::mem::size_of;
@@ -352,14 +348,14 @@ impl<T: MallocSizeOf> MallocSizeOf for [T] {
     }
 }
 
-#[cfg(feature = "servo")]
+#[cfg(feature = "serde_bytes")]
 impl MallocShallowSizeOf for ByteBuf {
     fn shallow_size_of(&self, ops: &mut MallocSizeOfOps) -> usize {
         unsafe { ops.malloc_size_of(self.as_ptr()) }
     }
 }
 
-#[cfg(feature = "servo")]
+#[cfg(feature = "serde_bytes")]
 impl MallocSizeOf for ByteBuf {
     fn size_of(&self, ops: &mut MallocSizeOfOps) -> usize {
         let mut n = self.shallow_size_of(ops);
@@ -638,17 +634,8 @@ impl MallocSizeOf for Void {
     }
 }
 
-#[cfg(feature = "servo")]
+#[cfg(feature = "string_cache")]
 impl<Static: string_cache::StaticAtomSet> MallocSizeOf for string_cache::Atom<Static> {
-    fn size_of(&self, _ops: &mut MallocSizeOfOps) -> usize {
-        0
-    }
-}
-
-// This is measured properly by the heap measurement implemented in
-// SpiderMonkey.
-#[cfg(feature = "servo")]
-impl<T: Copy + js::rust::GCMethods> MallocSizeOf for js::jsapi::Heap<T> {
     fn size_of(&self, _ops: &mut MallocSizeOfOps) -> usize {
         0
     }
@@ -707,61 +694,15 @@ impl MallocSizeOf for url::Host {
         }
     }
 }
-#[cfg(feature = "webrender_api")]
-malloc_size_of_is_0!(webrender_api::BorderRadius);
-#[cfg(feature = "webrender_api")]
-malloc_size_of_is_0!(webrender_api::BorderStyle);
-#[cfg(feature = "webrender_api")]
-malloc_size_of_is_0!(webrender_api::BorderWidths);
-#[cfg(feature = "webrender_api")]
-malloc_size_of_is_0!(webrender_api::BoxShadowClipMode);
-#[cfg(feature = "webrender_api")]
-malloc_size_of_is_0!(webrender_api::ClipAndScrollInfo);
-#[cfg(feature = "webrender_api")]
-malloc_size_of_is_0!(webrender_api::ColorF);
-#[cfg(feature = "webrender_api")]
-malloc_size_of_is_0!(webrender_api::ComplexClipRegion);
-#[cfg(feature = "webrender_api")]
-malloc_size_of_is_0!(webrender_api::ExtendMode);
-#[cfg(feature = "webrender_api")]
-malloc_size_of_is_0!(webrender_api::FilterOp);
-#[cfg(feature = "webrender_api")]
-malloc_size_of_is_0!(webrender_api::ExternalScrollId);
-#[cfg(feature = "webrender_api")]
-malloc_size_of_is_0!(webrender_api::FontInstanceKey);
-#[cfg(feature = "webrender_api")]
-malloc_size_of_is_0!(webrender_api::GradientStop);
-#[cfg(feature = "webrender_api")]
-malloc_size_of_is_0!(webrender_api::GlyphInstance);
-#[cfg(feature = "webrender_api")]
-malloc_size_of_is_0!(webrender_api::NinePatchBorder);
-#[cfg(feature = "webrender_api")]
-malloc_size_of_is_0!(webrender_api::ImageKey);
-#[cfg(feature = "webrender_api")]
-malloc_size_of_is_0!(webrender_api::ImageRendering);
-#[cfg(feature = "webrender_api")]
-malloc_size_of_is_0!(webrender_api::LineStyle);
-#[cfg(feature = "webrender_api")]
-malloc_size_of_is_0!(webrender_api::MixBlendMode);
-#[cfg(feature = "webrender_api")]
-malloc_size_of_is_0!(webrender_api::NormalBorder);
-#[cfg(feature = "webrender_api")]
-malloc_size_of_is_0!(webrender_api::RepeatMode);
-#[cfg(feature = "webrender_api")]
-malloc_size_of_is_0!(webrender_api::ScrollSensitivity);
-#[cfg(feature = "webrender_api")]
-malloc_size_of_is_0!(webrender_api::StickyOffsetBounds);
-#[cfg(feature = "webrender_api")]
-malloc_size_of_is_0!(webrender_api::TransformStyle);
 
-#[cfg(feature = "servo")]
+#[cfg(feature = "xml5ever")]
 impl MallocSizeOf for xml5ever::QualName {
     fn size_of(&self, ops: &mut MallocSizeOfOps) -> usize {
         self.prefix.size_of(ops) + self.ns.size_of(ops) + self.local.size_of(ops)
     }
 }
 
-#[cfg(feature = "servo")]
+#[cfg(feature = "hyper")]
 impl MallocSizeOf for hyper::header::Headers {
     fn size_of(&self, ops: &mut MallocSizeOfOps) -> usize {
         self.iter().fold(0, |acc, x| {
@@ -772,21 +713,21 @@ impl MallocSizeOf for hyper::header::Headers {
     }
 }
 
-#[cfg(feature = "servo")]
+#[cfg(feature = "hyper")]
 impl MallocSizeOf for hyper::header::ContentType {
     fn size_of(&self, ops: &mut MallocSizeOfOps) -> usize {
         self.0.size_of(ops)
     }
 }
 
-#[cfg(feature = "servo")]
+#[cfg(feature = "hyper")]
 impl MallocSizeOf for hyper::mime::Mime {
     fn size_of(&self, ops: &mut MallocSizeOfOps) -> usize {
         self.0.size_of(ops) + self.1.size_of(ops) + self.2.size_of(ops)
     }
 }
 
-#[cfg(feature = "servo")]
+#[cfg(feature = "hyper")]
 impl MallocSizeOf for hyper::mime::Attr {
     fn size_of(&self, ops: &mut MallocSizeOfOps) -> usize {
         match *self {
@@ -796,19 +737,19 @@ impl MallocSizeOf for hyper::mime::Attr {
     }
 }
 
-#[cfg(feature = "servo")]
+#[cfg(feature = "hyper")]
 impl MallocSizeOf for hyper::mime::Value {
     fn size_of(&self, _ops: &mut MallocSizeOfOps) -> usize {
         self.len() // Length of string value in bytes (not the char length of a string)!
     }
 }
 
-#[cfg(feature = "servo")]
+#[cfg(feature = "time")]
 malloc_size_of_is_0!(time::Duration);
-#[cfg(feature = "servo")]
+#[cfg(feature = "time")]
 malloc_size_of_is_0!(time::Tm);
 
-#[cfg(feature = "servo")]
+#[cfg(feature = "hyper_serde")]
 impl<T> MallocSizeOf for hyper_serde::Serde<T>
 where
     for<'de> hyper_serde::De<T>: serde::Deserialize<'de>,
@@ -820,7 +761,7 @@ where
     }
 }
 
-#[cfg(feature = "servo")]
+#[cfg(feature = "hyper")]
 impl MallocSizeOf for hyper::status::StatusCode {
     fn size_of(&self, ops: &mut MallocSizeOfOps) -> usize {
         match *self {

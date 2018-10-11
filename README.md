@@ -12,7 +12,6 @@ The following changes have been made in comparision to the original crate:
     - euclid
     - hyper
     - hyper_serde
-    - mozjs
     - serde
     - serde_bytes
     - smallbitvec
@@ -22,5 +21,4 @@ The following changes have been made in comparision to the original crate:
     - time
     - url
     - void
-    - webrender_api
     - xml5ever
