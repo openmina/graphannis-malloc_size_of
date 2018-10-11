@@ -46,21 +46,16 @@
 extern crate app_units;
 extern crate cssparser;
 extern crate euclid;
-extern crate hashglobe;
 #[cfg(feature = "servo")]
 extern crate hyper;
 #[cfg(feature = "servo")]
 extern crate hyper_serde;
 #[cfg(feature = "servo")]
 extern crate mozjs as js;
-extern crate selectors;
 #[cfg(feature = "servo")]
 extern crate serde;
 #[cfg(feature = "servo")]
 extern crate serde_bytes;
-extern crate servo_arc;
-#[cfg(feature = "servo")]
-extern crate servo_channel;
 extern crate smallbitvec;
 extern crate smallvec;
 #[cfg(feature = "servo")]
@@ -469,59 +464,6 @@ where
     }
 }
 
-impl<T, S> MallocShallowSizeOf for hashglobe::hash_set::HashSet<T, S>
-where
-    T: Eq + Hash,
-    S: BuildHasher,
-{
-    fn shallow_size_of(&self, ops: &mut MallocSizeOfOps) -> usize {
-        // See the implementation for std::collections::HashSet for details.
-        if ops.has_malloc_enclosing_size_of() {
-            self.iter()
-                .next()
-                .map_or(0, |t| unsafe { ops.malloc_enclosing_size_of(t) })
-        } else {
-            self.capacity() * (size_of::<T>() + size_of::<usize>())
-        }
-    }
-}
-
-impl<T, S> MallocSizeOf for hashglobe::hash_set::HashSet<T, S>
-where
-    T: Eq + Hash + MallocSizeOf,
-    S: BuildHasher,
-{
-    fn size_of(&self, ops: &mut MallocSizeOfOps) -> usize {
-        let mut n = self.shallow_size_of(ops);
-        for t in self.iter() {
-            n += t.size_of(ops);
-        }
-        n
-    }
-}
-
-impl<T, S> MallocShallowSizeOf for hashglobe::fake::HashSet<T, S>
-where
-    T: Eq + Hash,
-    S: BuildHasher,
-{
-    fn shallow_size_of(&self, ops: &mut MallocSizeOfOps) -> usize {
-        use std::ops::Deref;
-        self.deref().shallow_size_of(ops)
-    }
-}
-
-impl<T, S> MallocSizeOf for hashglobe::fake::HashSet<T, S>
-where
-    T: Eq + Hash + MallocSizeOf,
-    S: BuildHasher,
-{
-    fn size_of(&self, ops: &mut MallocSizeOfOps) -> usize {
-        use std::ops::Deref;
-        self.deref().size_of(ops)
-    }
-}
-
 impl<K, V, S> MallocShallowSizeOf for std::collections::HashMap<K, V, S>
 where
     K: Eq + Hash,
@@ -555,62 +497,6 @@ where
     }
 }
 
-impl<K, V, S> MallocShallowSizeOf for hashglobe::hash_map::HashMap<K, V, S>
-where
-    K: Eq + Hash,
-    S: BuildHasher,
-{
-    fn shallow_size_of(&self, ops: &mut MallocSizeOfOps) -> usize {
-        // See the implementation for std::collections::HashSet for details.
-        if ops.has_malloc_enclosing_size_of() {
-            self.values()
-                .next()
-                .map_or(0, |v| unsafe { ops.malloc_enclosing_size_of(v) })
-        } else {
-            self.capacity() * (size_of::<V>() + size_of::<K>() + size_of::<usize>())
-        }
-    }
-}
-
-impl<K, V, S> MallocSizeOf for hashglobe::hash_map::HashMap<K, V, S>
-where
-    K: Eq + Hash + MallocSizeOf,
-    V: MallocSizeOf,
-    S: BuildHasher,
-{
-    fn size_of(&self, ops: &mut MallocSizeOfOps) -> usize {
-        let mut n = self.shallow_size_of(ops);
-        for (k, v) in self.iter() {
-            n += k.size_of(ops);
-            n += v.size_of(ops);
-        }
-        n
-    }
-}
-
-impl<K, V, S> MallocShallowSizeOf for hashglobe::fake::HashMap<K, V, S>
-where
-    K: Eq + Hash,
-    S: BuildHasher,
-{
-    fn shallow_size_of(&self, ops: &mut MallocSizeOfOps) -> usize {
-        use std::ops::Deref;
-        self.deref().shallow_size_of(ops)
-    }
-}
-
-impl<K, V, S> MallocSizeOf for hashglobe::fake::HashMap<K, V, S>
-where
-    K: Eq + Hash + MallocSizeOf,
-    V: MallocSizeOf,
-    S: BuildHasher,
-{
-    fn size_of(&self, ops: &mut MallocSizeOfOps) -> usize {
-        use std::ops::Deref;
-        self.deref().size_of(ops)
-    }
-}
-
 // PhantomData is always 0.
 impl<T> MallocSizeOf for std::marker::PhantomData<T> {
     fn size_of(&self, _ops: &mut MallocSizeOfOps) -> usize {
@@ -624,38 +510,6 @@ impl<T> MallocSizeOf for std::marker::PhantomData<T> {
 // rc_arc_must_not_derive_malloc_size_of.rs)
 //impl<T> !MallocSizeOf for Arc<T> { }
 //impl<T> !MallocShallowSizeOf for Arc<T> { }
-
-impl<T> MallocUnconditionalShallowSizeOf for servo_arc::Arc<T> {
-    fn unconditional_shallow_size_of(&self, ops: &mut MallocSizeOfOps) -> usize {
-        unsafe { ops.malloc_size_of(self.heap_ptr()) }
-    }
-}
-
-impl<T: MallocSizeOf> MallocUnconditionalSizeOf for servo_arc::Arc<T> {
-    fn unconditional_size_of(&self, ops: &mut MallocSizeOfOps) -> usize {
-        self.unconditional_shallow_size_of(ops) + (**self).size_of(ops)
-    }
-}
-
-impl<T> MallocConditionalShallowSizeOf for servo_arc::Arc<T> {
-    fn conditional_shallow_size_of(&self, ops: &mut MallocSizeOfOps) -> usize {
-        if ops.have_seen_ptr(self.heap_ptr()) {
-            0
-        } else {
-            self.unconditional_shallow_size_of(ops)
-        }
-    }
-}
-
-impl<T: MallocSizeOf> MallocConditionalSizeOf for servo_arc::Arc<T> {
-    fn conditional_size_of(&self, ops: &mut MallocSizeOfOps) -> usize {
-        if ops.have_seen_ptr(self.heap_ptr()) {
-            0
-        } else {
-            self.unconditional_size_of(ops)
-        }
-    }
-}
 
 /// If a mutex is stored directly as a member of a data type that is being measured,
 /// it is the unique owner of its contents and deserves to be measured.
@@ -753,86 +607,6 @@ impl<T: MallocSizeOf, Src, Dst> MallocSizeOf for euclid::TypedTransform3D<T, Src
 impl<T: MallocSizeOf, U> MallocSizeOf for euclid::TypedVector2D<T, U> {
     fn size_of(&self, ops: &mut MallocSizeOfOps) -> usize {
         self.x.size_of(ops) + self.y.size_of(ops)
-    }
-}
-
-impl MallocSizeOf for selectors::parser::AncestorHashes {
-    fn size_of(&self, ops: &mut MallocSizeOfOps) -> usize {
-        let selectors::parser::AncestorHashes { ref packed_hashes } = *self;
-        packed_hashes.size_of(ops)
-    }
-}
-
-impl<Impl: selectors::parser::SelectorImpl> MallocSizeOf for selectors::parser::Selector<Impl>
-where
-    Impl::NonTSPseudoClass: MallocSizeOf,
-    Impl::PseudoElement: MallocSizeOf,
-{
-    fn size_of(&self, ops: &mut MallocSizeOfOps) -> usize {
-        let mut n = 0;
-
-        // It's OK to measure this ThinArc directly because it's the
-        // "primary" reference. (The secondary references are on the
-        // Stylist.)
-        n += unsafe { ops.malloc_size_of(self.thin_arc_heap_ptr()) };
-        for component in self.iter_raw_match_order() {
-            n += component.size_of(ops);
-        }
-
-        n
-    }
-}
-
-impl<Impl: selectors::parser::SelectorImpl> MallocSizeOf for selectors::parser::Component<Impl>
-where
-    Impl::NonTSPseudoClass: MallocSizeOf,
-    Impl::PseudoElement: MallocSizeOf,
-{
-    fn size_of(&self, ops: &mut MallocSizeOfOps) -> usize {
-        use selectors::parser::Component;
-
-        match self {
-            Component::AttributeOther(ref attr_selector) => attr_selector.size_of(ops),
-            Component::Negation(ref components) => components.size_of(ops),
-            Component::NonTSPseudoClass(ref pseudo) => (*pseudo).size_of(ops),
-            Component::Slotted(ref selector) | Component::Host(Some(ref selector)) => {
-                selector.size_of(ops)
-            },
-            Component::PseudoElement(ref pseudo) => (*pseudo).size_of(ops),
-            Component::Combinator(..) |
-            Component::ExplicitAnyNamespace |
-            Component::ExplicitNoNamespace |
-            Component::DefaultNamespace(..) |
-            Component::Namespace(..) |
-            Component::ExplicitUniversalType |
-            Component::LocalName(..) |
-            Component::ID(..) |
-            Component::Class(..) |
-            Component::AttributeInNoNamespaceExists { .. } |
-            Component::AttributeInNoNamespace { .. } |
-            Component::FirstChild |
-            Component::LastChild |
-            Component::OnlyChild |
-            Component::Root |
-            Component::Empty |
-            Component::Scope |
-            Component::NthChild(..) |
-            Component::NthLastChild(..) |
-            Component::NthOfType(..) |
-            Component::NthLastOfType(..) |
-            Component::FirstOfType |
-            Component::LastOfType |
-            Component::OnlyOfType |
-            Component::Host(None) => 0,
-        }
-    }
-}
-
-impl<Impl: selectors::parser::SelectorImpl> MallocSizeOf
-    for selectors::attr::AttrSelectorWithOptionalNamespace<Impl>
-{
-    fn size_of(&self, _ops: &mut MallocSizeOfOps) -> usize {
-        0
     }
 }
 
@@ -1020,15 +794,6 @@ where
 {
     fn size_of(&self, ops: &mut MallocSizeOfOps) -> usize {
         self.0.size_of(ops)
-    }
-}
-
-// Placeholder for unique case where internals of Sender cannot be measured.
-// malloc size of is 0 macro complains about type supplied!
-#[cfg(feature = "servo")]
-impl<T> MallocSizeOf for servo_channel::Sender<T> {
-    fn size_of(&self, _ops: &mut MallocSizeOfOps) -> usize {
-        0
     }
 }
 
