@@ -3,6 +3,8 @@ name = "graphannis-malloc_size_of"
 version = "0.1.0"
 authors = ["The Servo Project Developers", "Thomas Krause <thomaskrause@posteo.de>"]
 license = "Apache-2.0"
+repository= "https://github.com/corpus-tools/graphannis-malloc_size_of"
+readme = "README.md"
 
 [lib]
 path = "lib.rs"
