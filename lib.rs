@@ -43,8 +43,11 @@
 //!   measured as well as the thing it points to. E.g.
 //!   `<Box<_> as MallocSizeOf>::size_of(field, ops)`.
 
+#[cfg(feature = "app_units")]
 extern crate app_units;
+#[cfg(feature = "cssparser")]
 extern crate cssparser;
+#[cfg(feature = "euclid")]
 extern crate euclid;
 #[cfg(feature = "servo")]
 extern crate hyper;
@@ -56,15 +59,19 @@ extern crate mozjs as js;
 extern crate serde;
 #[cfg(feature = "servo")]
 extern crate serde_bytes;
+#[cfg(feature = "smallbitvec")]
 extern crate smallbitvec;
+#[cfg(feature = "smallvec")]
 extern crate smallvec;
 #[cfg(feature = "servo")]
 extern crate string_cache;
+#[cfg(feature = "thin_slice")]
 extern crate thin_slice;
 #[cfg(feature = "servo")]
 extern crate time;
 #[cfg(feature = "url")]
 extern crate url;
+#[cfg(feature = "void")]
 extern crate void;
 #[cfg(feature = "webrender_api")]
 extern crate webrender_api;
@@ -78,6 +85,8 @@ use std::mem::size_of;
 use std::ops::{Deref, DerefMut};
 use std::ops::Range;
 use std::os::raw::c_void;
+
+#[cfg(feature = "void")]
 use void::Void;
 
 /// A C function that takes a pointer to a heap allocation and returns its size.
@@ -234,6 +243,7 @@ impl<T: MallocSizeOf + ?Sized> MallocSizeOf for Box<T> {
     }
 }
 
+#[cfg(feature = "thin_slice")]
 impl<T> MallocShallowSizeOf for thin_slice::ThinBoxedSlice<T> {
     fn shallow_size_of(&self, ops: &mut MallocSizeOfOps) -> usize {
         let mut n = 0;
@@ -246,6 +256,7 @@ impl<T> MallocShallowSizeOf for thin_slice::ThinBoxedSlice<T> {
     }
 }
 
+#[cfg(feature = "thin_slice")]
 impl<T: MallocSizeOf> MallocSizeOf for thin_slice::ThinBoxedSlice<T> {
     fn size_of(&self, ops: &mut MallocSizeOfOps) -> usize {
         self.shallow_size_of(ops) + (**self).size_of(ops)
@@ -405,6 +416,7 @@ impl<T: MallocSizeOf> MallocSizeOf for std::collections::VecDeque<T> {
     }
 }
 
+#[cfg(feature = "smallvec")]
 impl<A: smallvec::Array> MallocShallowSizeOf for smallvec::SmallVec<A> {
     fn shallow_size_of(&self, ops: &mut MallocSizeOfOps) -> usize {
         if self.spilled() {
@@ -415,6 +427,7 @@ impl<A: smallvec::Array> MallocShallowSizeOf for smallvec::SmallVec<A> {
     }
 }
 
+#[cfg(feature = "smallvec")]
 impl<A> MallocSizeOf for smallvec::SmallVec<A>
 where
     A: smallvec::Array,
@@ -523,6 +536,7 @@ impl<T: MallocSizeOf> MallocSizeOf for std::sync::Mutex<T> {
     }
 }
 
+#[cfg(feature = "smallbitvec")]
 impl MallocSizeOf for smallbitvec::SmallBitVec {
     fn size_of(&self, ops: &mut MallocSizeOfOps) -> usize {
         if let Some(ptr) = self.heap_ptr() {
@@ -533,30 +547,35 @@ impl MallocSizeOf for smallbitvec::SmallBitVec {
     }
 }
 
+#[cfg(feature = "euclid")]
 impl<T: MallocSizeOf, Unit> MallocSizeOf for euclid::Length<T, Unit> {
     fn size_of(&self, ops: &mut MallocSizeOfOps) -> usize {
         self.0.size_of(ops)
     }
 }
 
+#[cfg(feature = "euclid")]
 impl<T: MallocSizeOf, Src, Dst> MallocSizeOf for euclid::TypedScale<T, Src, Dst> {
     fn size_of(&self, ops: &mut MallocSizeOfOps) -> usize {
         self.0.size_of(ops)
     }
 }
 
+#[cfg(feature = "euclid")]
 impl<T: MallocSizeOf, U> MallocSizeOf for euclid::TypedPoint2D<T, U> {
     fn size_of(&self, ops: &mut MallocSizeOfOps) -> usize {
         self.x.size_of(ops) + self.y.size_of(ops)
     }
 }
 
+#[cfg(feature = "euclid")]
 impl<T: MallocSizeOf, U> MallocSizeOf for euclid::TypedRect<T, U> {
     fn size_of(&self, ops: &mut MallocSizeOfOps) -> usize {
         self.origin.size_of(ops) + self.size.size_of(ops)
     }
 }
 
+#[cfg(feature = "euclid")]
 impl<T: MallocSizeOf, U> MallocSizeOf for euclid::TypedSideOffsets2D<T, U> {
     fn size_of(&self, ops: &mut MallocSizeOfOps) -> usize {
         self.top.size_of(ops) +
@@ -566,12 +585,14 @@ impl<T: MallocSizeOf, U> MallocSizeOf for euclid::TypedSideOffsets2D<T, U> {
     }
 }
 
+#[cfg(feature = "euclid")]
 impl<T: MallocSizeOf, U> MallocSizeOf for euclid::TypedSize2D<T, U> {
     fn size_of(&self, ops: &mut MallocSizeOfOps) -> usize {
         self.width.size_of(ops) + self.height.size_of(ops)
     }
 }
 
+#[cfg(feature = "euclid")]
 impl<T: MallocSizeOf, Src, Dst> MallocSizeOf for euclid::TypedTransform2D<T, Src, Dst> {
     fn size_of(&self, ops: &mut MallocSizeOfOps) -> usize {
         self.m11.size_of(ops) +
@@ -583,6 +604,7 @@ impl<T: MallocSizeOf, Src, Dst> MallocSizeOf for euclid::TypedTransform2D<T, Src
     }
 }
 
+#[cfg(feature = "euclid")]
 impl<T: MallocSizeOf, Src, Dst> MallocSizeOf for euclid::TypedTransform3D<T, Src, Dst> {
     fn size_of(&self, ops: &mut MallocSizeOfOps) -> usize {
         self.m11.size_of(ops) +
@@ -604,12 +626,14 @@ impl<T: MallocSizeOf, Src, Dst> MallocSizeOf for euclid::TypedTransform3D<T, Src
     }
 }
 
+#[cfg(feature = "euclid")]
 impl<T: MallocSizeOf, U> MallocSizeOf for euclid::TypedVector2D<T, U> {
     fn size_of(&self, ops: &mut MallocSizeOfOps) -> usize {
         self.x.size_of(ops) + self.y.size_of(ops)
     }
 }
 
+#[cfg(feature = "void")]
 impl MallocSizeOf for Void {
     #[inline]
     fn size_of(&self, _ops: &mut MallocSizeOfOps) -> usize {
@@ -671,8 +695,10 @@ malloc_size_of_is_0!(Range<u8>, Range<u16>, Range<u32>, Range<u64>, Range<usize>
 malloc_size_of_is_0!(Range<i8>, Range<i16>, Range<i32>, Range<i64>, Range<isize>);
 malloc_size_of_is_0!(Range<f32>, Range<f64>);
 
+#[cfg(feature = "app_units")]
 malloc_size_of_is_0!(app_units::Au);
 
+#[cfg(feature = "cssparser")]
 malloc_size_of_is_0!(cssparser::RGBA, cssparser::TokenSerializationType);
 
 #[cfg(feature = "url")]
