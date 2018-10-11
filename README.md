@@ -1,3 +1,6 @@
+Linux & MacOS: [![Build Status Linux & MacOS](https://travis-ci.org/corpus-tools/graphannis-malloc_size_of.svg?branch=develop)](https://travis-ci.org/corpus-tools/graphannis-malloc_size_of)
+Windows: [![Build status Windows](https://ci.appveyor.com/api/projects/status/2gsjtakjpnpjvlnp/branch/develop?svg=true)](https://ci.appveyor.com/project/thomaskrause/graphannis-malloc-size-of/branch/develop)
+
 # graphannis-malloc_size_of
 
 This is a fork of the `malloc_size_of` crate, which is part of the [Servo codebase](https://github.com/servo/servo/tree/master/components/malloc_size_of) but not published on crates.io yet. 
