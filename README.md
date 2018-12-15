@@ -10,7 +10,7 @@ The intention of this fork is to make the functionality of the original crate av
 
 The following changes have been made in comparision to the original crate:
 - References and implementations to internal/unpublished Servo crates have been removed.
-- All dependencies have been made optional, so if you want to use the memory size calculation for types not the standard library you have to activate these as a feature. The following crates are available as optional dependencies/features:
+- All dependencies have been made optional, so if you want to use the memory size calculation for types not in the standard library you have to activate these as a feature. The following crates are available as optional dependencies/features:
     - app_units
     - cssparser
     - euclid
