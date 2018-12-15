@@ -1,5 +1,5 @@
 [![Documentation link](https://docs.rs/graphannis-malloc_size_of/badge.svg)](https://docs.rs/graphannis-malloc_size_of/)
-/ Build status:  [![Build Status Linux & MacOS](https://travis-ci.org/corpus-tools/graphannis-malloc_size_of.svg?branch=develop)](https://travis-ci.org/corpus-tools/graphannis-malloc_size_of) (Linux & MacOS)
+/ Build status:  [![Build Status Linux & MacOS](https://travis-ci.org/koroling/graphannis-malloc_size_of.svg?branch=develop)](https://travis-ci.org/korpling/graphannis-malloc_size_of) (Linux & MacOS)
 [![Build status Windows](https://ci.appveyor.com/api/projects/status/2gsjtakjpnpjvlnp/branch/develop?svg=true)](https://ci.appveyor.com/project/thomaskrause/graphannis-malloc-size-of/branch/develop) (Windows)
 
 # graphannis-malloc_size_of
