@@ -44,12 +44,6 @@
 extern crate app_units;
 #[cfg(feature = "cssparser")]
 extern crate cssparser;
-#[cfg(feature = "euclid")]
-extern crate euclid;
-#[cfg(feature = "hyper")]
-extern crate hyper;
-#[cfg(feature = "hyper_serde")]
-extern crate hyper_serde;
 #[cfg(feature = "serde")]
 extern crate serde;
 #[cfg(feature = "serde_bytes")]
@@ -62,8 +56,6 @@ extern crate smallvec;
 extern crate string_cache;
 #[cfg(feature = "thin_slice")]
 extern crate thin_slice;
-#[cfg(feature = "time")]
-extern crate time;
 #[cfg(feature = "url")]
 extern crate url;
 #[cfg(feature = "void")]
@@ -220,7 +212,6 @@ impl MallocSizeOf for String {
 #[cfg(feature = "smartstring")]
 impl MallocSizeOf for smartstring::alias::String {
     fn size_of(&self, ops: &mut MallocSizeOfOps) -> usize {
-       
         if self.is_inline() {
             return 0;
         }
@@ -551,92 +542,6 @@ impl MallocSizeOf for smallbitvec::SmallBitVec {
     }
 }
 
-#[cfg(feature = "euclid")]
-impl<T: MallocSizeOf, Unit> MallocSizeOf for euclid::Length<T, Unit> {
-    fn size_of(&self, ops: &mut MallocSizeOfOps) -> usize {
-        self.0.size_of(ops)
-    }
-}
-
-#[cfg(feature = "euclid")]
-impl<T: MallocSizeOf, Src, Dst> MallocSizeOf for euclid::TypedScale<T, Src, Dst> {
-    fn size_of(&self, ops: &mut MallocSizeOfOps) -> usize {
-        self.0.size_of(ops)
-    }
-}
-
-#[cfg(feature = "euclid")]
-impl<T: MallocSizeOf, U> MallocSizeOf for euclid::TypedPoint2D<T, U> {
-    fn size_of(&self, ops: &mut MallocSizeOfOps) -> usize {
-        self.x.size_of(ops) + self.y.size_of(ops)
-    }
-}
-
-#[cfg(feature = "euclid")]
-impl<T: MallocSizeOf, U> MallocSizeOf for euclid::TypedRect<T, U> {
-    fn size_of(&self, ops: &mut MallocSizeOfOps) -> usize {
-        self.origin.size_of(ops) + self.size.size_of(ops)
-    }
-}
-
-#[cfg(feature = "euclid")]
-impl<T: MallocSizeOf, U> MallocSizeOf for euclid::TypedSideOffsets2D<T, U> {
-    fn size_of(&self, ops: &mut MallocSizeOfOps) -> usize {
-        self.top.size_of(ops)
-            + self.right.size_of(ops)
-            + self.bottom.size_of(ops)
-            + self.left.size_of(ops)
-    }
-}
-
-#[cfg(feature = "euclid")]
-impl<T: MallocSizeOf, U> MallocSizeOf for euclid::TypedSize2D<T, U> {
-    fn size_of(&self, ops: &mut MallocSizeOfOps) -> usize {
-        self.width.size_of(ops) + self.height.size_of(ops)
-    }
-}
-
-#[cfg(feature = "euclid")]
-impl<T: MallocSizeOf, Src, Dst> MallocSizeOf for euclid::TypedTransform2D<T, Src, Dst> {
-    fn size_of(&self, ops: &mut MallocSizeOfOps) -> usize {
-        self.m11.size_of(ops)
-            + self.m12.size_of(ops)
-            + self.m21.size_of(ops)
-            + self.m22.size_of(ops)
-            + self.m31.size_of(ops)
-            + self.m32.size_of(ops)
-    }
-}
-
-#[cfg(feature = "euclid")]
-impl<T: MallocSizeOf, Src, Dst> MallocSizeOf for euclid::TypedTransform3D<T, Src, Dst> {
-    fn size_of(&self, ops: &mut MallocSizeOfOps) -> usize {
-        self.m11.size_of(ops)
-            + self.m12.size_of(ops)
-            + self.m13.size_of(ops)
-            + self.m14.size_of(ops)
-            + self.m21.size_of(ops)
-            + self.m22.size_of(ops)
-            + self.m23.size_of(ops)
-            + self.m24.size_of(ops)
-            + self.m31.size_of(ops)
-            + self.m32.size_of(ops)
-            + self.m33.size_of(ops)
-            + self.m34.size_of(ops)
-            + self.m41.size_of(ops)
-            + self.m42.size_of(ops)
-            + self.m43.size_of(ops)
-            + self.m44.size_of(ops)
-    }
-}
-
-#[cfg(feature = "euclid")]
-impl<T: MallocSizeOf, U> MallocSizeOf for euclid::TypedVector2D<T, U> {
-    fn size_of(&self, ops: &mut MallocSizeOfOps) -> usize {
-        self.x.size_of(ops) + self.y.size_of(ops)
-    }
-}
-
 #[cfg(feature = "void")]
 impl MallocSizeOf for Void {
     #[inline]
@@ -710,75 +615,6 @@ impl MallocSizeOf for url::Host {
 impl MallocSizeOf for xml5ever::QualName {
     fn size_of(&self, ops: &mut MallocSizeOfOps) -> usize {
         self.prefix.size_of(ops) + self.ns.size_of(ops) + self.local.size_of(ops)
-    }
-}
-
-#[cfg(feature = "hyper")]
-impl MallocSizeOf for hyper::header::Headers {
-    fn size_of(&self, ops: &mut MallocSizeOfOps) -> usize {
-        self.iter().fold(0, |acc, x| {
-            let name = x.name();
-            let raw = self.get_raw(name);
-            acc + raw.size_of(ops)
-        })
-    }
-}
-
-#[cfg(feature = "hyper")]
-impl MallocSizeOf for hyper::header::ContentType {
-    fn size_of(&self, ops: &mut MallocSizeOfOps) -> usize {
-        self.0.size_of(ops)
-    }
-}
-
-#[cfg(feature = "hyper")]
-impl MallocSizeOf for hyper::mime::Mime {
-    fn size_of(&self, ops: &mut MallocSizeOfOps) -> usize {
-        self.0.size_of(ops) + self.1.size_of(ops) + self.2.size_of(ops)
-    }
-}
-
-#[cfg(feature = "hyper")]
-impl MallocSizeOf for hyper::mime::Attr {
-    fn size_of(&self, ops: &mut MallocSizeOfOps) -> usize {
-        match *self {
-            hyper::mime::Attr::Ext(ref s) => s.size_of(ops),
-            _ => 0,
-        }
-    }
-}
-
-#[cfg(feature = "hyper")]
-impl MallocSizeOf for hyper::mime::Value {
-    fn size_of(&self, _ops: &mut MallocSizeOfOps) -> usize {
-        self.len() // Length of string value in bytes (not the char length of a string)!
-    }
-}
-
-#[cfg(feature = "time")]
-malloc_size_of_is_0!(time::Duration);
-#[cfg(feature = "time")]
-malloc_size_of_is_0!(time::Tm);
-
-#[cfg(feature = "hyper_serde")]
-impl<T> MallocSizeOf for hyper_serde::Serde<T>
-where
-    for<'de> hyper_serde::De<T>: serde::Deserialize<'de>,
-    for<'a> hyper_serde::Ser<'a, T>: serde::Serialize,
-    T: MallocSizeOf,
-{
-    fn size_of(&self, ops: &mut MallocSizeOfOps) -> usize {
-        self.0.size_of(ops)
-    }
-}
-
-#[cfg(feature = "hyper")]
-impl MallocSizeOf for hyper::status::StatusCode {
-    fn size_of(&self, ops: &mut MallocSizeOfOps) -> usize {
-        match *self {
-            hyper::status::StatusCode::Unregistered(u) => u.size_of(ops),
-            _ => 0,
-        }
     }
 }
 

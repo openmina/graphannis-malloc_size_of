@@ -1,6 +1,6 @@
 [package]
 name = "graphannis-malloc_size_of"
-version = "1.1.0"
+version = "2.0.0"
 authors = ["The Servo Project Developers", "Thomas Krause <thomaskrause@posteo.de>"]
 license = "Apache-2.0"
 description = "This is a fork of the `malloc_size_of` crate, which is part of the Servo codebase, to make it available to the graphANNIS corpus search library as dependency."
@@ -12,18 +12,14 @@ path = "lib.rs"
 
 [dependencies]
 app_units = { version = "0.7", optional = true }
-cssparser = { version = "0.28", optional = true }
-euclid =  { version = "0.19", optional = true}
-hyper = { version = "0.10", optional = true }
-hyper_serde = { version = "0.8", optional = true }
+cssparser = { version = "0.29", optional = true }
 serde = { version = "1.0.27", optional = true }
-serde_bytes = { version = "0.10", optional = true }
+serde_bytes = { version = "0.11", optional = true }
 smallbitvec = {version = "2.1.0", optional = true }
 smallvec = {version = "0.6", optional = true }
-string_cache = { version = "0.7", optional = true }
+string_cache = { version = "0.8", optional = true }
 thin-slice = {version = "0.1.0", optional = true }
-time = { version = "0.1.17", optional = true }
-url = { version = "1.2", optional = true }
+url = { version = "2", optional = true }
 void = { version = "1.0.2", optional = true }
-xml5ever = { version = "0.12", optional = true }
-smartstring = {version = "0.2", optional = true }
+xml5ever = { version = "0.17    ", optional = true }
+smartstring = {version = "1", optional = true }
