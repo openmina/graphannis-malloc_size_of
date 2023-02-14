@@ -3,7 +3,7 @@ on: push
 jobs:
   test_linux:
     name: Execute automated tests on Ubuntu Linux
-    runs-on: ubuntu-16.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - uses: actions-rs/toolchain@v1
@@ -20,7 +20,7 @@ jobs:
       - run: cargo test --all-features --verbose
   test_windows:
     name: Execute automated tests on Windows
-    runs-on: windows-2016
+    runs-on: windows-2019
     steps:
       - uses: actions/checkout@v2
       - uses: actions-rs/toolchain@v1
