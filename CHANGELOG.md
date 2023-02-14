@@ -7,11 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
-- Removed `hyper` and `hyper_serde` feature and support for this crates.
+- Removed `euclid`, `hyper`, `hyper_serde` and `time`,  feature and support for this crates.
 
 ### Changed
 
-- Updated `smartstring` crate version to 1.0.0.
+- Updated `smartstring`, `cssparser`, `url` and `xml5ever` crates to their newest version.
 
 ## [1.1.0] - 2021-02-08
 

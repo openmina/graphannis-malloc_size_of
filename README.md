@@ -11,7 +11,6 @@ The following changes have been made in comparision to the original crate:
 - All dependencies have been made optional, so if you want to use the memory size calculation for types not in the standard library you have to activate these as a feature. The following crates are available as optional dependencies/features:
     - app_units
     - cssparser
-    - euclid
     - serde
     - serde_bytes
     - smallbitvec
@@ -19,7 +18,6 @@ The following changes have been made in comparision to the original crate:
     - smartstring
     - string_cache 
     - thin-slice
-    - time
     - url
     - void
     - xml5ever
