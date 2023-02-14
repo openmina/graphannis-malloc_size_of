@@ -46,10 +46,6 @@ extern crate app_units;
 extern crate cssparser;
 #[cfg(feature = "euclid")]
 extern crate euclid;
-#[cfg(feature = "hyper")]
-extern crate hyper;
-#[cfg(feature = "hyper_serde")]
-extern crate hyper_serde;
 #[cfg(feature = "serde")]
 extern crate serde;
 #[cfg(feature = "serde_bytes")]
@@ -713,74 +709,11 @@ impl MallocSizeOf for xml5ever::QualName {
     }
 }
 
-#[cfg(feature = "hyper")]
-impl MallocSizeOf for hyper::header::Headers {
-    fn size_of(&self, ops: &mut MallocSizeOfOps) -> usize {
-        self.iter().fold(0, |acc, x| {
-            let name = x.name();
-            let raw = self.get_raw(name);
-            acc + raw.size_of(ops)
-        })
-    }
-}
-
-#[cfg(feature = "hyper")]
-impl MallocSizeOf for hyper::header::ContentType {
-    fn size_of(&self, ops: &mut MallocSizeOfOps) -> usize {
-        self.0.size_of(ops)
-    }
-}
-
-#[cfg(feature = "hyper")]
-impl MallocSizeOf for hyper::mime::Mime {
-    fn size_of(&self, ops: &mut MallocSizeOfOps) -> usize {
-        self.0.size_of(ops) + self.1.size_of(ops) + self.2.size_of(ops)
-    }
-}
-
-#[cfg(feature = "hyper")]
-impl MallocSizeOf for hyper::mime::Attr {
-    fn size_of(&self, ops: &mut MallocSizeOfOps) -> usize {
-        match *self {
-            hyper::mime::Attr::Ext(ref s) => s.size_of(ops),
-            _ => 0,
-        }
-    }
-}
-
-#[cfg(feature = "hyper")]
-impl MallocSizeOf for hyper::mime::Value {
-    fn size_of(&self, _ops: &mut MallocSizeOfOps) -> usize {
-        self.len() // Length of string value in bytes (not the char length of a string)!
-    }
-}
-
 #[cfg(feature = "time")]
 malloc_size_of_is_0!(time::Duration);
 #[cfg(feature = "time")]
 malloc_size_of_is_0!(time::Tm);
 
-#[cfg(feature = "hyper_serde")]
-impl<T> MallocSizeOf for hyper_serde::Serde<T>
-where
-    for<'de> hyper_serde::De<T>: serde::Deserialize<'de>,
-    for<'a> hyper_serde::Ser<'a, T>: serde::Serialize,
-    T: MallocSizeOf,
-{
-    fn size_of(&self, ops: &mut MallocSizeOfOps) -> usize {
-        self.0.size_of(ops)
-    }
-}
-
-#[cfg(feature = "hyper")]
-impl MallocSizeOf for hyper::status::StatusCode {
-    fn size_of(&self, ops: &mut MallocSizeOfOps) -> usize {
-        match *self {
-            hyper::status::StatusCode::Unregistered(u) => u.size_of(ops),
-            _ => 0,
-        }
-    }
-}
 
 /// Measurable that defers to inner value and used to verify MallocSizeOf implementation in a
 /// struct.

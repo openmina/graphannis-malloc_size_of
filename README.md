@@ -12,8 +12,6 @@ The following changes have been made in comparision to the original crate:
     - app_units
     - cssparser
     - euclid
-    - hyper
-    - hyper_serde
     - serde
     - serde_bytes
     - smallbitvec
