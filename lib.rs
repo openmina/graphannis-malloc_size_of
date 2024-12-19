@@ -82,9 +82,6 @@ type VoidPtrToBoolFnMut = dyn FnMut(*const c_void) -> bool;
 
 /// Operations used when measuring heap usage of data structures.
 pub struct MallocSizeOfOps {
-    /// A function that returns the size of a heap allocation.
-    size_of_op: VoidPtrToSizeFn,
-
     /// Like `size_of_op`, but can take an interior pointer. Optional because
     /// not all allocators support this operation. If it's not provided, some
     /// memory measurements will actually be computed estimates rather than
@@ -99,12 +96,10 @@ pub struct MallocSizeOfOps {
 
 impl MallocSizeOfOps {
     pub fn new(
-        size_of: VoidPtrToSizeFn,
         malloc_enclosing_size_of: Option<VoidPtrToSizeFn>,
         have_seen_ptr: Option<Box<VoidPtrToBoolFnMut>>,
     ) -> Self {
         MallocSizeOfOps {
-            size_of_op: size_of,
             enclosing_size_of_op: malloc_enclosing_size_of,
             have_seen_ptr_op: have_seen_ptr,
         }
@@ -126,11 +121,9 @@ impl MallocSizeOfOps {
     /// Call `size_of_op` on `ptr`, first checking that the allocation isn't
     /// empty, because some types (such as `Vec`) utilize empty allocations.
     pub unsafe fn malloc_size_of<T: ?Sized>(&self, ptr: *const T) -> usize {
-        if MallocSizeOfOps::is_empty(ptr) {
-            0
-        } else {
-            (self.size_of_op)(ptr as *const c_void)
-        }
+        // TODO(vlad):
+        let _ = ptr;
+        0
     }
 
     /// Is an `enclosing_size_of_op` available?
@@ -204,8 +197,8 @@ pub trait MallocConditionalShallowSizeOf {
 }
 
 impl MallocSizeOf for String {
-    fn size_of(&self, ops: &mut MallocSizeOfOps) -> usize {
-        unsafe { ops.malloc_size_of(self.as_ptr()) }
+    fn size_of(&self, _ops: &mut MallocSizeOfOps) -> usize {
+        self.capacity()
     }
 }
 
@@ -227,8 +220,8 @@ impl<'a, T: ?Sized> MallocSizeOf for &'a T {
 }
 
 impl<T: ?Sized> MallocShallowSizeOf for Box<T> {
-    fn shallow_size_of(&self, ops: &mut MallocSizeOfOps) -> usize {
-        unsafe { ops.malloc_size_of(&**self) }
+    fn shallow_size_of(&self, _ops: &mut MallocSizeOfOps) -> usize {
+        size_of_val::<T>(self.as_ref())
     }
 }
 
@@ -369,8 +362,8 @@ impl MallocSizeOf for ByteBuf {
 }
 
 impl<T> MallocShallowSizeOf for Vec<T> {
-    fn shallow_size_of(&self, ops: &mut MallocSizeOfOps) -> usize {
-        unsafe { ops.malloc_size_of(self.as_ptr()) }
+    fn shallow_size_of(&self, _ops: &mut MallocSizeOfOps) -> usize {
+        self.capacity() * size_of::<T>()
     }
 }
 
