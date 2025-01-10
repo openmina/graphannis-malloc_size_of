@@ -498,6 +498,21 @@ where
     }
 }
 
+impl<T> MallocShallowSizeOf for std::collections::LinkedList<T> {
+    fn shallow_size_of(&self, _ops: &mut MallocSizeOfOps) -> usize {
+        self.len() * size_of::<T>()
+    }
+}
+
+impl<T> MallocSizeOf for std::collections::LinkedList<T>
+where
+    T: MallocSizeOf,
+{
+    fn size_of(&self, ops: &mut MallocSizeOfOps) -> usize {
+        self.shallow_size_of(ops) + self.iter().map(|i| i.size_of(ops)).sum::<usize>()
+    }
+}
+
 // PhantomData is always 0.
 impl<T> MallocSizeOf for std::marker::PhantomData<T> {
     fn size_of(&self, _ops: &mut MallocSizeOfOps) -> usize {
